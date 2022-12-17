@@ -122,6 +122,7 @@ type ApisixRouteHTTPMatch struct {
 	//       - "127.0.0.1"
 	//       - "10.0.5.11"
 	NginxVars []v2.ApisixRouteHTTPMatchExpr `json:"exprs,omitempty" yaml:"exprs,omitempty"`
+	FilterFunc string `json:"filter_func,omitempty" yaml:"filter_func,omitempty"`
 }
 
 // ApisixRouteHTTPMatchExpr represents a binary route match expression .

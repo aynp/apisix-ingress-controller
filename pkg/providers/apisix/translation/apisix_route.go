@@ -188,6 +188,7 @@ func (t *translator) translateHTTPRouteV2beta3(ctx *translation.TranslateContext
 		route.EnableWebsocket = part.Websocket
 		route.Plugins = pluginMap
 		route.Timeout = timeout
+		route.FilterFunc = part.Match.FilterFunc
 		if part.PluginConfigName != "" {
 			route.PluginConfigId = id.GenID(apisixv1.ComposePluginConfigName(ar.Namespace, part.PluginConfigName))
 		}
