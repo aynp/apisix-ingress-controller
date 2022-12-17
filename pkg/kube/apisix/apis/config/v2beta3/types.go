@@ -73,6 +73,7 @@ type ApisixRouteHTTP struct {
 	PluginConfigName string                      `json:"plugin_config_name,omitempty" yaml:"plugin_config_name,omitempty"`
 	Plugins          []ApisixRouteHTTPPlugin     `json:"plugins,omitempty" yaml:"plugins,omitempty"`
 	Authentication   ApisixRouteAuthentication   `json:"authentication,omitempty" yaml:"authentication,omitempty"`
+	FilterFunc       string                      `json:"filter_func,omitempty" yaml:"filter_func,omitempty"`
 }
 
 // ApisixRouteHTTPBackend represents a HTTP backend (a Kuberentes Service).
