@@ -263,7 +263,8 @@ var _ = ginkgo.Describe("suite-ingress-resource: ApisixTls mTLS Test", func() {
 
 			// create ApisixTls resource
 			tlsName := "tls-with-client-ca"
-			err = s.NewApisixTlsWithClientCA(tlsName, host, serverCertSecret, clientCASecret)
+			skipMtlsUriRegex := "/unused-route"
+			err = s.NewApisixTlsWithClientCA(tlsName, host, serverCertSecret, clientCASecret, skipMtlsUriRegex)
 			assert.Nil(ginkgo.GinkgoT(), err, "create ApisixTls with client CA error")
 			// check ssl in APISIX
 			assert.Nil(ginkgo.GinkgoT(), s.EnsureNumApisixTlsCreated(1))
@@ -290,11 +291,6 @@ spec:
 			assert.Nil(ginkgo.GinkgoT(), s.CreateVersionedApisixResource(apisixRoute))
 			assert.Nil(ginkgo.GinkgoT(), s.EnsureNumApisixRoutesCreated(1))
 
-			// Without Client Cert
-			// From APISIX v2.14, If the client does not carry a certificate request, it will fail directly.
-			// Previous versions would return 400.
-			// s.NewAPISIXHttpsClient(host).GET("/ip").WithHeader("Host", host).Expect().Status(http.StatusBadRequest).Body().Raw()
-
 			// With client cert
 			caCertPool := x509.NewCertPool()
 			ok := caCertPool.AppendCertsFromPEM([]byte(rootCA.String()))
@@ -305,6 +301,21 @@ spec:
 
 			s.NewAPISIXHttpsClientWithCertificates(host, true, caCertPool, []tls.Certificate{cert}).
 				GET("/ip").WithHeader("Host", host).Expect().Status(http.StatusOK)
+
+			// Without client cert
+
+			// If the client does not carry a certificate request, it will return 400.
+			s.NewAPISIXHttpsClient(host).GET("/ip").WithHeader("Host", host).Expect().Status(http.StatusBadRequest).Body().Raw()
+
+			err = s.DeleteApisixTls(tlsName, host, serverCertSecret)
+			assert.Nil(ginkgo.GinkgoT(), err, "delete ApisixTls with client CA error")
+
+			// When skip_mtls_uri_regex is set for a route, it won't require a client cert
+			skipMtlsUriRegex = "/ip"
+			err = s.NewApisixTlsWithClientCA(tlsName, host, serverCertSecret, clientCASecret, skipMtlsUriRegex)
+			assert.Nil(ginkgo.GinkgoT(), err, "create ApisixTls with client CA error")
+
+			s.NewAPISIXHttpsClient(host).GET("/ip").WithHeader("Host", host).Expect().Status(http.StatusOK)
 		})
 	}
 
