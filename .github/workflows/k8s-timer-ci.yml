@@ -89,8 +89,9 @@ jobs:
         env:
           TAG: dev
           ARCH: amd64
-          REGISTRY: localhost:5000
+          REGISTRY: 127.0.0.1:5000
           ENABLE_PROXY: "false"
+          BASE_IMAGE_TAG: "debug"
         run: |
           echo "building images..."
           make clean-image build-images
@@ -102,6 +103,7 @@ jobs:
             ${REGISTRY}/apisix-ingress-controller:dev \
             ${REGISTRY}/httpbin:dev \
             ${REGISTRY}/test-backend:dev \
+            ${REGISTRY}/test-timeout:dev \
             ${REGISTRY}/echo-server:dev \
             ${REGISTRY}/busybox:dev \
             | pigz > docker.tar.gz

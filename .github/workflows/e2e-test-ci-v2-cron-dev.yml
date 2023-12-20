@@ -33,6 +33,7 @@ concurrency:
 
 jobs:
   changes:
+    if: ${{ (!github.event.pull_request.draft && github.event.schedule == '0 0 * * *') }}
     runs-on: ubuntu-20.04
     outputs:
       docs: ${{ steps.filter.outputs.docs }}
@@ -99,8 +100,9 @@ jobs:
           APISIX_ADMIN_API_VERSION: "v3"
           TAG: dev
           ARCH: amd64
-          REGISTRY: localhost:5000
+          REGISTRY: 127.0.0.1:5000
           ENABLE_PROXY: "false"
+          BASE_IMAGE_TAG: "debug"
         run: |
           echo "building images..."
           TARGET_APISIX_VERSION=dev make clean-image build-images
@@ -112,6 +114,7 @@ jobs:
             ${REGISTRY}/apisix-ingress-controller:dev \
             ${REGISTRY}/httpbin:dev \
             ${REGISTRY}/test-backend:dev \
+            ${REGISTRY}/test-timeout:dev \
             ${REGISTRY}/echo-server:dev \
             ${REGISTRY}/busybox:dev \
             | pigz > docker-dev.tar.gz
@@ -203,7 +206,6 @@ jobs:
         env:
           E2E_FOCUS: "${{ matrix.suite }}"
           ENABLE_PROXY: "false"
-          INGRESS_CLASS: "${{ matrix.ingress-class-values }}"
           E2E_SKIP_BUILD: "1"
           E2E_FLAKE_ATTEMPTS: "2"
           E2E_ENV: "ci"
